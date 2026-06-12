@@ -159,3 +159,45 @@ test("truncateTitle never splits a surrogate pair", () => {
     assert.equal(out, "AB…");
     assert.ok(!/[\uD800-\uDBFF]$/.test(out.slice(0, -1)));
 });
+
+test("groupByDay groups, labels and sorts (all-day first)", () => {
+    const events = [
+        ev({ title: "Afternoon", startDateTime: new Date("2026-06-12T16:00:00"), endDateTime: new Date("2026-06-12T17:00:00") }),
+        ev({ title: "Holiday", isAllDay: true, startDateTime: new Date("2026-06-12T00:00:00"), endDateTime: new Date("2026-06-13T00:00:00") }),
+        ev({ title: "MondayMeet", startDateTime: new Date("2026-06-15T09:00:00"), endDateTime: new Date("2026-06-15T10:00:00") }),
+    ];
+    const groups = L.groupByDay(events, NOW, { popupDays: 7 }, d => "Monday");
+    assert.equal(groups.length, 2);
+    assert.equal(groups[0].label, "Today");
+    assert.deepEqual(groups[0].events.map(e => e.title), ["Holiday", "Afternoon"]);
+    assert.equal(groups[1].label, "Monday");
+});
+
+test("groupByDay: ongoing multi-day event appears under Today only; finished events dropped", () => {
+    const ongoing = ev({ title: "Offsite", startDateTime: new Date("2026-06-11T09:00:00"), endDateTime: new Date("2026-06-13T18:00:00") });
+    const finished = ev({ title: "Done", startDateTime: new Date("2026-06-12T08:00:00"), endDateTime: new Date("2026-06-12T09:00:00") });
+    const groups = L.groupByDay([ongoing, finished], NOW, { popupDays: 7 }, d => "X");
+    assert.equal(groups.length, 1);
+    assert.equal(groups[0].label, "Today");
+    assert.deepEqual(groups[0].events.map(e => e.title), ["Offsite"]);
+});
+
+test("groupByDay respects popupDays window", () => {
+    const nextWeek = ev({ startDateTime: new Date("2026-06-20T09:00:00"), endDateTime: new Date("2026-06-20T10:00:00") });
+    assert.equal(L.groupByDay([nextWeek], NOW, { popupDays: 7 }, d => "X").length, 0);
+});
+
+test("timeRangeText renders range or All day", () => {
+    assert.equal(L.timeRangeText(ev({}), FMT), "14:30–15:00");
+    assert.equal(L.timeRangeText(ev({ isAllDay: true }), FMT), "All day");
+});
+
+test("findMeetingUrl finds Teams/Meet/Zoom, decodes &amp;, else null", () => {
+    const teams = "Join here <https://teams.microsoft.com/l/meetup-join/19%3ameeting_abc%40thread.v2/0?context=x&amp;y=z>";
+    assert.equal(L.findMeetingUrl(teams), "https://teams.microsoft.com/l/meetup-join/19%3ameeting_abc%40thread.v2/0?context=x&y=z");
+    assert.equal(L.findMeetingUrl("at https://meet.google.com/abc-defg-hij today"), "https://meet.google.com/abc-defg-hij");
+    assert.equal(L.findMeetingUrl("https://company.zoom.us/j/123456?pwd=x"), "https://company.zoom.us/j/123456?pwd=x");
+    assert.equal(L.findMeetingUrl("no links here"), null);
+    assert.equal(L.findMeetingUrl(""), null);
+    assert.equal(L.findMeetingUrl(null), null);
+});

@@ -131,6 +131,65 @@ function formatPanelText(selection, now, opts, fmtTime) {
     return { text: title + " · tomorrow " + fmtTime(evnt.startDateTime), urgent: false };
 }
 
+function groupByDay(events, now, opts, weekdayName) {
+    var popupDays = (opts && opts.popupDays) || 7;
+    var todayStart = startOfDay(now);
+    var groups = [];
+    for (var i = 0; i < popupDays; i++) {
+        var dayStart = addDays(todayStart, i);
+        var dayEnd = addDays(dayStart, 1);
+        var isToday = i === 0;
+        var dayEvents = events.filter(function (e) {
+            if (isToday) {
+                // today: anything still relevant now, including multi-day events
+                return e.endDateTime > now && e.startDateTime < dayEnd;
+            }
+            // later days: only events that start on this day
+            return e.startDateTime >= dayStart && e.startDateTime < dayEnd;
+        });
+        if (!dayEvents.length) {
+            continue;
+        }
+        dayEvents.sort(function (a, b) {
+            if (a.isAllDay !== b.isAllDay) {
+                return a.isAllDay ? -1 : 1;
+            }
+            return a.startDateTime - b.startDateTime;
+        });
+        var label = isToday ? "Today" : (i === 1 ? "Tomorrow" : weekdayName(dayStart));
+        groups.push({ key: dayStart.toDateString(), label: label, date: dayStart, events: dayEvents });
+    }
+    return groups;
+}
+
+function timeRangeText(evnt, fmtTime) {
+    fmtTime = fmtTime || defaultTimeFormat;
+    if (evnt.isAllDay) {
+        return "All day";
+    }
+    return fmtTime(evnt.startDateTime) + "–" + fmtTime(evnt.endDateTime);
+}
+
+var MEETING_URL_PATTERNS = [
+    /https:\/\/teams\.microsoft\.com\/l\/meetup-join\/[^\s<>"')\]]+/i,
+    /https:\/\/meet\.google\.com\/[a-z0-9-]+/i,
+    /https:\/\/[\w.-]*zoom\.us\/j\/[^\s<>"')\]]+/i,
+];
+
+function findMeetingUrl(text) {
+    if (!text) {
+        return null;
+    }
+    var decoded = text.replace(/&amp;/g, "&");
+    for (var i = 0; i < MEETING_URL_PATTERNS.length; i++) {
+        var m = decoded.match(MEETING_URL_PATTERNS[i]);
+        if (m) {
+            return m[0];
+        }
+    }
+    return null;
+}
+
 if (typeof module !== "undefined" && module.exports) {
     module.exports = {
         dedupe: dedupe,
@@ -141,5 +200,8 @@ if (typeof module !== "undefined" && module.exports) {
         formatPanelText: formatPanelText,
         truncateTitle: truncateTitle,
         defaultTimeFormat: defaultTimeFormat,
+        groupByDay: groupByDay,
+        timeRangeText: timeRangeText,
+        findMeetingUrl: findMeetingUrl,
     };
 }
