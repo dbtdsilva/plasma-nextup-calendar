@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kcfg xmlns="http://www.kde.org/standards/kcfg/1.0"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.kde.org/standards/kcfg/1.0 http://www.kde.org/standards/kcfg/1.0/kcfg.xsd">
+    <kcfgfile name=""/>
+    <group name="General">
+        <entry name="lookahead" type="String">
+            <label>Window for the panel's next event: today, todayTomorrow or 24h</label>
+            <default>todayTomorrow</default>
+        </entry>
+        <entry name="maxTitleLength" type="Int">
+            <label>Maximum characters of the event title shown in the panel</label>
+            <default>30</default>
+        </entry>
+        <entry name="urgentThresholdMinutes" type="Int">
+            <label>Highlight the panel text when the event starts within this many minutes</label>
+            <default>5</default>
+        </entry>
+        <entry name="placeholderText" type="String">
+            <label>Panel text when there is no upcoming event</label>
+            <default>No upcoming events</default>
+        </entry>
+        <entry name="popupDays" type="Int">
+            <label>Number of days shown in the agenda popup</label>
+            <default>7</default>
+        </entry>
+    </group>
+</kcfg>
