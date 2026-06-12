@@ -162,7 +162,7 @@ test("dedupe keeps same title at different times", () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `node --test tests/`
+Run: `node --test`
 Expected: FAIL — `Cannot find module '../package/contents/js/eventlogic.js'`
 
 - [ ] **Step 3: Write minimal implementation**
@@ -201,7 +201,7 @@ if (typeof module !== "undefined" && module.exports) {
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `node --test tests/`
+Run: `node --test`
 Expected: PASS (2 tests)
 
 - [ ] **Step 5: Commit**
@@ -275,7 +275,7 @@ test("selectPanelEvent ignores finished events", () => {
 
 - [ ] **Step 2: Run tests to verify the new ones fail**
 
-Run: `node --test tests/`
+Run: `node --test`
 Expected: FAIL — `L.selectPanelEvent is not a function` (dedupe tests still pass)
 
 - [ ] **Step 3: Implement** (add to `eventlogic.js` above the export guard; extend exports)
@@ -354,7 +354,7 @@ if (typeof module !== "undefined" && module.exports) {
 
 - [ ] **Step 4: Run tests to verify they pass**
 
-Run: `node --test tests/`
+Run: `node --test`
 Expected: PASS (9 tests)
 
 - [ ] **Step 5: Commit**
@@ -421,7 +421,7 @@ test("formatPanelText rounds sub-minute countdown up to 1", () => {
 
 - [ ] **Step 2: Run tests to verify the new ones fail**
 
-Run: `node --test tests/`
+Run: `node --test`
 Expected: FAIL — `L.formatPanelText is not a function`
 
 - [ ] **Step 3: Implement** (add to `eventlogic.js`; extend exports with `formatPanelText`, `truncateTitle`, `defaultTimeFormat`)
@@ -476,7 +476,7 @@ function formatPanelText(selection, now, opts, fmtTime) {
 
 - [ ] **Step 4: Run tests to verify they pass**
 
-Run: `node --test tests/`
+Run: `node --test`
 Expected: PASS (15 tests)
 
 - [ ] **Step 5: Commit**
@@ -544,7 +544,7 @@ test("findMeetingUrl finds Teams/Meet/Zoom, decodes &amp;, else null", () => {
 
 - [ ] **Step 2: Run tests to verify the new ones fail**
 
-Run: `node --test tests/`
+Run: `node --test`
 Expected: FAIL — `L.groupByDay is not a function`
 
 - [ ] **Step 3: Implement** (add to `eventlogic.js`; extend exports with `groupByDay`, `timeRangeText`, `findMeetingUrl`)
@@ -613,7 +613,7 @@ NOTE for the closure over `i` inside `filter`: `var i` is captured by reference,
 
 - [ ] **Step 4: Run tests to verify they pass**
 
-Run: `node --test tests/`
+Run: `node --test`
 Expected: PASS (20 tests)
 
 - [ ] **Step 5: Commit**
@@ -1229,7 +1229,7 @@ Expected: expanding the compact view shows day headers ("Today", "Tomorrow", wee
 
 - [ ] **Step 3: Run the full JS test suite once more**
 
-Run: `node --test tests/`
+Run: `node --test`
 Expected: PASS (20 tests)
 
 - [ ] **Step 4: Commit**
@@ -1312,7 +1312,7 @@ Then add **Next Up Calendar** to your panel via *Add Widgets*.
 
 ## Development
 
-Logic is pure JavaScript with tests: `node --test tests/`
+Logic is pure JavaScript with tests: `node --test`
 Preview: `plasmoidviewer --applet ./package`
 
 ## License
@@ -1330,7 +1330,7 @@ Expected: panel shows next event text matching Merkuro; popup, click-to-join, se
 
 - [ ] **Step 4: Run full test suite, commit**
 
-Run: `node --test tests/`
+Run: `node --test`
 Expected: PASS (20 tests)
 
 ```bash
@@ -1342,7 +1342,7 @@ git commit -m "feat: install script and README"
 
 ## Final verification (after all tasks)
 
-1. `node --test tests/` → all pass.
+1. `node --test` → all pass.
 2. `plasmoidviewer --applet ./package` → no QML errors in terminal output.
 3. Real panel: event text correct vs Merkuro, urgent color appears within threshold, popup matches Merkuro's agenda, Teams link opens browser, config changes apply.
 4. `git log --oneline` → one commit per task, working tree clean.
