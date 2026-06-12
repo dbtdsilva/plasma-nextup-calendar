@@ -21,6 +21,8 @@ Item {
     property string pimPluginId: ""
     property string lastDayStamp: new Date().toDateString()
 
+    onDaysAheadChanged: refreshDebounce.restart()
+
     signal eventsChanged()
 
     visible: false
@@ -64,7 +66,10 @@ Item {
     PlasmaCalendar.Calendar {
         id: calendar
         days: 7
-        weeks: 6
+        // 8 weeks, not the usual 6: the grid is month-anchored with up to 7 leading
+        // cells, so 6 weeks can leave as few as 4 trailing days — losing events from
+        // the collection window at month end. 56 cells guarantee >= 18 trailing days.
+        weeks: 8
         firstDayOfWeek: Qt.locale().firstDayOfWeek
         today: new Date()
         Component.onCompleted: daysModel.setPluginsManager(pluginsManager)
@@ -115,7 +120,7 @@ Item {
         for (let i = 0; i < daysAhead; i++) {
             const day = new Date(todayStart);
             day.setDate(day.getDate() + i);
-            const list = calendar.daysModel.eventsForDate(day);
+            const list = calendar.daysModel.eventsForDate(day) || [];
             for (let j = 0; j < list.length; j++) {
                 const ev = list[j];
                 all.push({
