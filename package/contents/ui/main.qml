@@ -47,7 +47,8 @@ PlasmoidItem {
 
     compactRepresentation: CompactRepresentation {
         panelModel: root.panelModel
-        onActivated: root.expanded = !root.expanded
+        isExpanded: root.expanded
+        onActivated: wasExpanded => root.expanded = !wasExpanded
     }
 
     fullRepresentation: FullRepresentation {
