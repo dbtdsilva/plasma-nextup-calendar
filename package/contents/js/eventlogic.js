@@ -173,7 +173,7 @@ function timeRangeText(evnt, fmtTime) {
 var MEETING_URL_PATTERNS = [
     /https:\/\/teams\.microsoft\.com\/l\/meetup-join\/[^\s<>"')\]]+/i,
     /https:\/\/meet\.google\.com\/[a-z0-9-]+/i,
-    /https:\/\/[\w.-]*zoom\.us\/j\/[^\s<>"')\]]+/i,
+    /https:\/\/(?:[\w-]+\.)*zoom\.us\/j\/[^\s<>"')\]]+/i,
 ];
 
 function findMeetingUrl(text) {
@@ -184,7 +184,7 @@ function findMeetingUrl(text) {
     for (var i = 0; i < MEETING_URL_PATTERNS.length; i++) {
         var m = decoded.match(MEETING_URL_PATTERNS[i]);
         if (m) {
-            return m[0];
+            return m[0].replace(/[.,;:]+$/, "");
         }
     }
     return null;

@@ -201,3 +201,19 @@ test("findMeetingUrl finds Teams/Meet/Zoom, decodes &amp;, else null", () => {
     assert.equal(L.findMeetingUrl(""), null);
     assert.equal(L.findMeetingUrl(null), null);
 });
+
+test("findMeetingUrl: zoom host anchored, trailing punctuation stripped, priority order", () => {
+    assert.equal(L.findMeetingUrl("https://notzoom.us/j/123"), null);
+    assert.equal(L.findMeetingUrl("https://phishing-zoom.us/j/123"), null);
+    assert.equal(L.findMeetingUrl("https://zoom.us/j/123"), "https://zoom.us/j/123");
+    assert.equal(L.findMeetingUrl("join https://company.zoom.us/j/123."), "https://company.zoom.us/j/123");
+    const both = "first https://company.zoom.us/j/9 then https://teams.microsoft.com/l/meetup-join/abc";
+    assert.equal(L.findMeetingUrl(both), "https://teams.microsoft.com/l/meetup-join/abc");
+});
+
+test("groupByDay labels the second day Tomorrow", () => {
+    const tomorrow = ev({ startDateTime: new Date("2026-06-13T09:00:00"), endDateTime: new Date("2026-06-13T10:00:00") });
+    const groups = L.groupByDay([tomorrow], NOW, { popupDays: 7 }, d => "X");
+    assert.equal(groups.length, 1);
+    assert.equal(groups[0].label, "Tomorrow");
+});
