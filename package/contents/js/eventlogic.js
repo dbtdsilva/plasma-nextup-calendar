@@ -47,6 +47,7 @@ function selectPanelEvent(events, now, opts) {
     if (lookahead === "today") {
         windowEnd = addDays(todayStart, 1);
     } else if (lookahead === "24h") {
+        // 24 real hours deliberately, not wall-clock: across a DST change this is 23/25 wall hours
         windowEnd = new Date(now.getTime() + 24 * 60 * 60 * 1000);
     } else {
         windowEnd = addDays(todayStart, 2);
@@ -78,6 +79,52 @@ function selectPanelEvent(events, now, opts) {
     return { kind: "none", event: null };
 }
 
+function defaultTimeFormat(d) {
+    function pad(n) { return n < 10 ? "0" + n : "" + n; }
+    return pad(d.getHours()) + ":" + pad(d.getMinutes());
+}
+
+function truncateTitle(title, maxLen) {
+    if (!title) {
+        return "";
+    }
+    if (title.length <= maxLen) {
+        return title;
+    }
+    return title.slice(0, maxLen - 1).replace(/\s+$/, "") + "…";
+}
+
+function formatPanelText(selection, now, opts, fmtTime) {
+    fmtTime = fmtTime || defaultTimeFormat;
+    var o = opts || {};
+    var maxLen = o.maxTitleLength || 30;
+    var urgentMin = (o.urgentThresholdMinutes === undefined) ? 5 : o.urgentThresholdMinutes;
+    var placeholder = o.placeholderText || "No upcoming events";
+
+    if (!selection || selection.kind === "none") {
+        return { text: placeholder, urgent: false };
+    }
+    var evnt = selection.event;
+    var title = truncateTitle(evnt.title, maxLen);
+
+    if (selection.kind === "ongoing") {
+        return { text: title + " · ends " + fmtTime(evnt.endDateTime), urgent: false };
+    }
+    if (selection.kind === "allday") {
+        var suffix = (evnt.startDateTime <= now || isSameDay(evnt.startDateTime, now)) ? " · all day" : " · tomorrow";
+        return { text: title + suffix, urgent: false };
+    }
+    // upcoming
+    var mins = Math.ceil((evnt.startDateTime - now) / 60000);
+    if (mins <= 60) {
+        return { text: title + " · in " + mins + " min", urgent: mins <= urgentMin };
+    }
+    if (isSameDay(evnt.startDateTime, now)) {
+        return { text: title + " · " + fmtTime(evnt.startDateTime), urgent: false };
+    }
+    return { text: title + " · tomorrow " + fmtTime(evnt.startDateTime), urgent: false };
+}
+
 if (typeof module !== "undefined" && module.exports) {
     module.exports = {
         dedupe: dedupe,
@@ -85,5 +132,8 @@ if (typeof module !== "undefined" && module.exports) {
         startOfDay: startOfDay,
         addDays: addDays,
         isSameDay: isSameDay,
+        formatPanelText: formatPanelText,
+        truncateTitle: truncateTitle,
+        defaultTimeFormat: defaultTimeFormat,
     };
 }

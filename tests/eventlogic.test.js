@@ -86,3 +86,58 @@ test("selectPanelEvent ignores finished events", () => {
     const done = ev({ startDateTime: new Date("2026-06-12T10:00:00"), endDateTime: new Date("2026-06-12T11:00:00") });
     assert.equal(L.selectPanelEvent([done], NOW, { lookahead: "todayTomorrow" }).kind, "none");
 });
+
+test("selectPanelEvent boundary: start exactly now is ongoing, end exactly now is finished", () => {
+    const startsNow = ev({ startDateTime: new Date("2026-06-12T13:00:00"), endDateTime: new Date("2026-06-12T13:30:00") });
+    assert.equal(L.selectPanelEvent([startsNow], NOW, { lookahead: "todayTomorrow" }).kind, "ongoing");
+    const endsNow = ev({ startDateTime: new Date("2026-06-12T12:00:00"), endDateTime: new Date("2026-06-12T13:00:00") });
+    assert.equal(L.selectPanelEvent([endsNow], NOW, { lookahead: "todayTomorrow" }).kind, "none");
+});
+
+test("selectPanelEvent boundary: start exactly at windowEnd is excluded", () => {
+    const atMidnight = ev({ startDateTime: new Date("2026-06-13T00:00:00"), endDateTime: new Date("2026-06-13T00:30:00") });
+    assert.equal(L.selectPanelEvent([atMidnight], NOW, { lookahead: "today" }).kind, "none");
+    const at24h = ev({ startDateTime: new Date("2026-06-13T13:00:00"), endDateTime: new Date("2026-06-13T13:30:00") });
+    assert.equal(L.selectPanelEvent([at24h], NOW, { lookahead: "24h" }).kind, "none");
+});
+
+const FMT = d => `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+const OPTS = { maxTitleLength: 30, urgentThresholdMinutes: 5, placeholderText: "No upcoming events" };
+
+test("formatPanelText: ongoing shows end time", () => {
+    const sel = { kind: "ongoing", event: ev({ endDateTime: new Date("2026-06-12T15:00:00") }) };
+    assert.deepEqual(L.formatPanelText(sel, NOW, OPTS, FMT), { text: "Standup · ends 15:00", urgent: false });
+});
+
+test("formatPanelText: imminent shows countdown, urgent at threshold", () => {
+    const at1310 = { kind: "upcoming", event: ev({ startDateTime: new Date("2026-06-12T13:10:00") }) };
+    assert.deepEqual(L.formatPanelText(at1310, NOW, OPTS, FMT), { text: "Standup · in 10 min", urgent: false });
+    const at1304 = { kind: "upcoming", event: ev({ startDateTime: new Date("2026-06-12T13:04:00") }) };
+    assert.deepEqual(L.formatPanelText(at1304, NOW, OPTS, FMT), { text: "Standup · in 4 min", urgent: true });
+});
+
+test("formatPanelText: later today shows start time, tomorrow says tomorrow", () => {
+    const later = { kind: "upcoming", event: ev({ startDateTime: new Date("2026-06-12T16:00:00") }) };
+    assert.equal(L.formatPanelText(later, NOW, OPTS, FMT).text, "Standup · 16:00");
+    const tomorrow = { kind: "upcoming", event: ev({ startDateTime: new Date("2026-06-13T09:00:00") }) };
+    assert.equal(L.formatPanelText(tomorrow, NOW, OPTS, FMT).text, "Standup · tomorrow 09:00");
+});
+
+test("formatPanelText: all-day variants and placeholder", () => {
+    const today = { kind: "allday", event: ev({ title: "Holiday", isAllDay: true, startDateTime: new Date("2026-06-12T00:00:00"), endDateTime: new Date("2026-06-13T00:00:00") }) };
+    assert.equal(L.formatPanelText(today, NOW, OPTS, FMT).text, "Holiday · all day");
+    const tomorrow = { kind: "allday", event: ev({ title: "Trip", isAllDay: true, startDateTime: new Date("2026-06-13T00:00:00"), endDateTime: new Date("2026-06-14T00:00:00") }) };
+    assert.equal(L.formatPanelText(tomorrow, NOW, OPTS, FMT).text, "Trip · tomorrow");
+    assert.deepEqual(L.formatPanelText({ kind: "none", event: null }, NOW, OPTS, FMT), { text: "No upcoming events", urgent: false });
+});
+
+test("formatPanelText truncates long titles with ellipsis", () => {
+    const sel = { kind: "upcoming", event: ev({ title: "A very long meeting title that never ends", startDateTime: new Date("2026-06-12T16:00:00") }) };
+    const out = L.formatPanelText(sel, NOW, Object.assign({}, OPTS, { maxTitleLength: 10 }), FMT);
+    assert.equal(out.text, "A very lo… · 16:00");
+});
+
+test("formatPanelText rounds sub-minute countdown up to 1", () => {
+    const sel = { kind: "upcoming", event: ev({ startDateTime: new Date("2026-06-12T13:00:30") }) };
+    assert.equal(L.formatPanelText(sel, NOW, OPTS, FMT).text, "Standup · in 1 min");
+});
