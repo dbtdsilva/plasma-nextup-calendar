@@ -1,0 +1,20 @@
+{
+    "KPackageStructure": "Plasma/Applet",
+    "KPlugin": {
+        "Authors": [
+            {
+                "Email": "diogo.silva@loxy.cloud",
+                "Name": "Diogo Silva"
+            }
+        ],
+        "Category": "Date and Time",
+        "Description": "Shows your next calendar event in the panel, like GNOME's Next Up",
+        "Icon": "view-calendar-upcoming",
+        "Id": "com.github.dbtdsilva.nextupcalendar",
+        "License": "GPL-2.0-or-later",
+        "Name": "Next Up Calendar",
+        "Version": "0.1.0",
+        "Website": "https://github.com/dbtdsilva/plasma-nextup-calendar"
+    },
+    "X-Plasma-API-Minimum-Version": "6.0"
+}
