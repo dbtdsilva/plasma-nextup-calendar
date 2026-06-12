@@ -91,7 +91,12 @@ function truncateTitle(title, maxLen) {
     if (title.length <= maxLen) {
         return title;
     }
-    return title.slice(0, maxLen - 1).replace(/\s+$/, "") + "…";
+    var cut = title.slice(0, maxLen - 1);
+    var lastCode = cut.charCodeAt(cut.length - 1);
+    if (lastCode >= 0xD800 && lastCode <= 0xDBFF) {
+        cut = cut.slice(0, -1);
+    }
+    return cut.replace(/\s+$/, "") + "…";
 }
 
 function formatPanelText(selection, now, opts, fmtTime) {
@@ -99,6 +104,7 @@ function formatPanelText(selection, now, opts, fmtTime) {
     var o = opts || {};
     var maxLen = o.maxTitleLength || 30;
     var urgentMin = (o.urgentThresholdMinutes === undefined) ? 5 : o.urgentThresholdMinutes;
+    // || on purpose: an empty placeholder would collapse the panel click target
     var placeholder = o.placeholderText || "No upcoming events";
 
     if (!selection || selection.kind === "none") {

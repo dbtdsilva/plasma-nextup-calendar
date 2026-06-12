@@ -141,3 +141,21 @@ test("formatPanelText rounds sub-minute countdown up to 1", () => {
     const sel = { kind: "upcoming", event: ev({ startDateTime: new Date("2026-06-12T13:00:30") }) };
     assert.equal(L.formatPanelText(sel, NOW, OPTS, FMT).text, "Standup · in 1 min");
 });
+
+test("formatPanelText: urgent at exactly the threshold", () => {
+    const at1305 = { kind: "upcoming", event: ev({ startDateTime: new Date("2026-06-12T13:05:00") }) };
+    assert.deepEqual(L.formatPanelText(at1305, NOW, OPTS, FMT), { text: "Standup · in 5 min", urgent: true });
+});
+
+test("formatPanelText: countdown at exactly 60 min, time form at 61", () => {
+    const at60 = { kind: "upcoming", event: ev({ startDateTime: new Date("2026-06-12T14:00:00") }) };
+    assert.equal(L.formatPanelText(at60, NOW, OPTS, FMT).text, "Standup · in 60 min");
+    const at61 = { kind: "upcoming", event: ev({ startDateTime: new Date("2026-06-12T14:01:00") }) };
+    assert.equal(L.formatPanelText(at61, NOW, OPTS, FMT).text, "Standup · 14:01");
+});
+
+test("truncateTitle never splits a surrogate pair", () => {
+    const out = L.truncateTitle("AB\u{1F389}CD", 4);
+    assert.equal(out, "AB…");
+    assert.ok(!/[\uD800-\uDBFF]$/.test(out.slice(0, -1)));
+});
