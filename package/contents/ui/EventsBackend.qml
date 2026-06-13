@@ -20,7 +20,11 @@ Item {
     property bool pimAvailable: false
     property string pimPluginId: ""
     // Whether the calendar-events integration is on (fed from config by main.qml).
-    property bool pluginEnabled: true
+    // Defaults false so we only ever ENABLE the shared pimevents plugin once the
+    // real config value arrives — never enable-at-discovery and then unload when a
+    // stored "false" resolves a moment later, which would destabilise the shared
+    // calendar plugin and crash other consumers (the Digital Clock).
+    property bool pluginEnabled: false
     property string lastDayStamp: new Date().toDateString()
 
     onDaysAheadChanged: refreshDebounce.restart()
@@ -64,6 +68,9 @@ Item {
         if (!pluginEnabled || !pimAvailable) {
             return;
         }
+        if (pluginsManager.enabledPlugins.indexOf(pimPluginId) !== -1) {
+            return; // already loaded — avoid a redundant model reset
+        }
         // Loads the plugin; DaysModel reacts to pluginsChanged with a queued
         // update() that queries the visible date range.
         pluginsManager.enabledPlugins = [pimPluginId];
@@ -71,6 +78,12 @@ Item {
     }
 
     // React to the config switch flipping at runtime.
+    //
+    // Enable-at-startup is driven by whichever of {plugin discovery, the
+    // pluginEnabled binding resolving to true} happens last: discovery calls
+    // enablePimPlugin() only if pluginEnabled is already true, and this handler
+    // calls it on a false->true flip after discovery. enablePimPlugin() is
+    // idempotent, so both firing is harmless.
     onPluginEnabledChanged: {
         if (!pimAvailable) {
             return;
@@ -79,7 +92,11 @@ Item {
             enablePimPlugin();
             refreshDebounce.restart();
         } else {
-            pluginsManager.enabledPlugins = [];
+            // Do NOT unload the plugin (pluginsManager.enabledPlugins = []):
+            // it is shared process-wide with the Digital Clock, and unloading it
+            // out from under another live consumer crashes libcalendarplugin.so.
+            // The collect() guard already makes "off" authoritative at the display
+            // layer, so we just stop showing events and leave the plugin loaded.
             upcomingEvents = [];
             console.info("[nextup] calendar events disabled");
             eventsChanged();
