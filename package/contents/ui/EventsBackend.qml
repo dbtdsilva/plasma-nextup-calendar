@@ -19,6 +19,8 @@ Item {
     property var upcomingEvents: []
     property bool pimAvailable: false
     property string pimPluginId: ""
+    // Whether the calendar-events integration is on (fed from config by main.qml).
+    property bool pluginEnabled: true
     property string lastDayStamp: new Date().toDateString()
 
     onDaysAheadChanged: refreshDebounce.restart()
@@ -50,17 +52,37 @@ Item {
                 if (!backend.pimAvailable && pluginId.indexOf("pimevents") !== -1) {
                     backend.pimAvailable = true;
                     backend.pimPluginId = pluginId;
-                    Qt.callLater(backend.enablePimPlugin);
+                    if (backend.pluginEnabled) {
+                        Qt.callLater(backend.enablePimPlugin);
+                    }
                 }
             }
         }
     }
 
     function enablePimPlugin() {
+        if (!pluginEnabled || !pimAvailable) {
+            return;
+        }
         // Loads the plugin; DaysModel reacts to pluginsChanged with a queued
         // update() that queries the visible date range.
         pluginsManager.enabledPlugins = [pimPluginId];
         console.info("[nextup] enabled calendar plugin:", pimPluginId);
+    }
+
+    // React to the config switch flipping at runtime.
+    onPluginEnabledChanged: {
+        if (!pimAvailable) {
+            return;
+        }
+        if (pluginEnabled) {
+            enablePimPlugin();
+        } else {
+            pluginsManager.enabledPlugins = [];
+            upcomingEvents = [];
+            console.info("[nextup] calendar events disabled");
+            eventsChanged();
+        }
     }
 
     PlasmaCalendar.Calendar {

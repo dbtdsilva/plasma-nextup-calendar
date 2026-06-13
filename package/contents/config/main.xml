@@ -28,5 +28,9 @@
             <label>Number of days shown in the agenda popup</label>
             <default>7</default>
         </entry>
+        <entry name="pimEventsEnabled" type="Bool">
+            <label>Show calendar events from the PIM Events plugin</label>
+            <default>true</default>
+        </entry>
     </group>
 </kcfg>
