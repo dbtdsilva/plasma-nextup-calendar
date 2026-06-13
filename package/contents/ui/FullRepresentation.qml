@@ -72,76 +72,83 @@ PlasmaExtras.Representation {
         id: agendaModel
     }
 
-    PlasmaExtras.PlaceholderMessage {
-        anchors.centerIn: parent
-        width: parent.width - Kirigami.Units.gridUnit * 2
-        visible: !full.pimAvailable || agendaModel.count === 0
-        iconName: "view-calendar-upcoming"
-        text: full.pimAvailable
-            ? i18n("No upcoming events")
-            : i18n("PIM Events plugin not found")
-        explanation: full.pimAvailable
-            ? i18n("Make sure your calendars are synced in Merkuro and Akonadi is running.")
-            : i18n("Install the kdepim-addons package, then re-add this widget.")
-    }
+    // Both the list and the placeholder must live inside the laid-out
+    // contentItem. A PlaceholderMessage placed as a stray child of
+    // PlasmaExtras.Representation gets no geometry and never renders, so the
+    // empty / no-calendars-enabled state would otherwise show a blank popup.
+    contentItem: Item {
+        ListView {
+            id: agendaList
+            anchors.fill: parent
+            visible: agendaModel.count > 0
+            model: agendaModel
+            clip: true
+            section.property: "dayLabel"
+            section.delegate: Kirigami.ListSectionHeader {
+                required property string section
+                width: agendaList.width
+                text: section
+            }
+            delegate: PlasmaComponents.ItemDelegate {
+                id: row
 
-    contentItem: ListView {
-        id: agendaList
-        visible: agendaModel.count > 0
-        model: agendaModel
-        clip: true
-        section.property: "dayLabel"
-        section.delegate: Kirigami.ListSectionHeader {
-            required property string section
-            width: agendaList.width
-            text: section
-        }
-        delegate: PlasmaComponents.ItemDelegate {
-            id: row
+                required property string title
+                required property string timeText
+                required property string eventColor
+                required property string description
+                required property bool hasMeetingUrl
 
-            required property string title
-            required property string timeText
-            required property string eventColor
-            required property string description
-            required property bool hasMeetingUrl
+                width: agendaList.width
+                onClicked: full.activateEvent(row.description)
 
-            width: agendaList.width
-            onClicked: full.activateEvent(row.description)
+                contentItem: RowLayout {
+                    spacing: Kirigami.Units.smallSpacing
 
-            contentItem: RowLayout {
-                spacing: Kirigami.Units.smallSpacing
-
-                Rectangle {
-                    width: Kirigami.Units.smallSpacing * 2
-                    height: width
-                    radius: width / 2
-                    color: row.eventColor !== "" ? row.eventColor : Kirigami.Theme.highlightColor
-                }
-
-                ColumnLayout {
-                    Layout.fillWidth: true
-                    spacing: 0
-
-                    PlasmaComponents.Label {
-                        Layout.fillWidth: true
-                        text: row.title
-                        elide: Text.ElideRight
+                    Rectangle {
+                        width: Kirigami.Units.smallSpacing * 2
+                        height: width
+                        radius: width / 2
+                        color: row.eventColor !== "" ? row.eventColor : Kirigami.Theme.highlightColor
                     }
-                    PlasmaComponents.Label {
-                        Layout.fillWidth: true
-                        text: row.timeText
-                        opacity: 0.7
-                        font: Kirigami.Theme.smallFont
-                    }
-                }
 
-                Kirigami.Icon {
-                    visible: row.hasMeetingUrl
-                    source: "camera-video-symbolic"
-                    Layout.preferredWidth: Kirigami.Units.iconSizes.small
-                    Layout.preferredHeight: Kirigami.Units.iconSizes.small
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: 0
+
+                        PlasmaComponents.Label {
+                            Layout.fillWidth: true
+                            text: row.title
+                            elide: Text.ElideRight
+                        }
+                        PlasmaComponents.Label {
+                            Layout.fillWidth: true
+                            text: row.timeText
+                            opacity: 0.7
+                            font: Kirigami.Theme.smallFont
+                        }
+                    }
+
+                    Kirigami.Icon {
+                        visible: row.hasMeetingUrl
+                        source: "camera-video-symbolic"
+                        Layout.preferredWidth: Kirigami.Units.iconSizes.small
+                        Layout.preferredHeight: Kirigami.Units.iconSizes.small
+                    }
                 }
             }
+        }
+
+        PlasmaExtras.PlaceholderMessage {
+            anchors.centerIn: parent
+            width: parent.width - Kirigami.Units.gridUnit * 2
+            visible: !full.pimAvailable || agendaModel.count === 0
+            iconName: "view-calendar-upcoming"
+            text: full.pimAvailable
+                ? i18n("No upcoming events")
+                : i18n("PIM Events plugin not found")
+            explanation: full.pimAvailable
+                ? i18n("Make sure your calendars are synced in Merkuro and Akonadi is running.")
+                : i18n("Install the kdepim-addons package, then re-add this widget.")
         }
     }
 
