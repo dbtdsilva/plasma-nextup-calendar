@@ -55,7 +55,7 @@ Item {
         Loader {
             id: pickerLoader
             Layout.fillWidth: true
-            Layout.fillHeight: true
+            Layout.fillHeight: page.pimConfigUi !== ""
             active: page.pimConfigUi !== ""
             source: page.pimConfigUi
             // Forward the picker's change signal so Apply enables and persists.
@@ -68,7 +68,6 @@ Item {
 
         Kirigami.PlaceholderMessage {
             Layout.fillWidth: true
-            Layout.fillHeight: true
             Layout.alignment: Qt.AlignCenter
             visible: page.pimConfigUi === ""
             icon.name: "view-calendar-upcoming"
