@@ -1,3 +1,7 @@
+/*
+    SPDX-FileCopyrightText: 2026 Diogo Silva <diogo.silva@loxy.cloud>
+    SPDX-License-Identifier: GPL-2.0-or-later
+*/
 import QtQuick
 import QtQuick.Controls as QQC2
 import org.kde.kirigami as Kirigami
