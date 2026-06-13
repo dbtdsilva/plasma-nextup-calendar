@@ -10,14 +10,23 @@ import org.kde.plasma.workspace.calendar as PlasmaCalendar
 Item {
     id: page
 
+    // Emitted to the config dialog so it enables the Apply button.
+    signal configurationChanged()
+
     // URL of pimevents' PimEventsConfig.qml, discovered from the plugin model
     property string pimConfigUi: ""
+
+    // Called by the config dialog on Apply (for the current page).
+    function saveConfig() {
+        if (pickerLoader.item && pickerLoader.item.saveConfig) {
+            pickerLoader.item.saveConfig();
+        }
+    }
 
     PlasmaCalendar.EventPluginsManager {
         id: pluginsManager
     }
 
-    // Find the pimevents row in the plugins model and read its configUi.
     Instantiator {
         model: pluginsManager.model
         delegate: QtObject {
@@ -31,10 +40,30 @@ Item {
         }
     }
 
-    Loader {
-        id: pickerLoader
+    ColumnLayout {
         anchors.fill: parent
-        active: page.pimConfigUi !== ""
-        source: page.pimConfigUi
+        spacing: Kirigami.Units.smallSpacing
+
+        Kirigami.InlineMessage {
+            Layout.fillWidth: true
+            visible: page.pimConfigUi !== ""
+            position: Kirigami.InlineMessage.Position.Header
+            type: Kirigami.MessageType.Information
+            text: i18n("This calendar selection is shared with other calendar widgets, such as the Digital Clock.")
+        }
+
+        Loader {
+            id: pickerLoader
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            active: page.pimConfigUi !== ""
+            source: page.pimConfigUi
+            // Forward the picker's change signal so Apply enables and persists.
+            onItemChanged: {
+                if (item && item.configurationChanged) {
+                    item.configurationChanged.connect(page.configurationChanged);
+                }
+            }
+        }
     }
 }
