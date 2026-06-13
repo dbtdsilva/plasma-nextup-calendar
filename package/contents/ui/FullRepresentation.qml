@@ -8,6 +8,8 @@ import org.kde.kirigami as Kirigami
 import org.kde.plasma.components as PlasmaComponents
 import org.kde.plasma.extras as PlasmaExtras
 import org.kde.plasma.plasma5support as P5Support
+import QtQuick.Controls as QQC2
+import org.kde.plasma.plasmoid
 import "../js/eventlogic.js" as Logic
 
 PlasmaExtras.Representation {
@@ -156,8 +158,24 @@ PlasmaExtras.Representation {
         position: PlasmaExtras.PlasmoidHeading.Position.Footer
         RowLayout {
             anchors.fill: parent
+
             PlasmaComponents.Button {
-                Layout.alignment: Qt.AlignRight
+                icon.name: "configure"
+                display: QQC2.AbstractButton.IconOnly
+                text: i18n("Configure Next Up Calendar")
+                QQC2.ToolTip.visible: hovered
+                QQC2.ToolTip.text: text
+                onClicked: {
+                    const action = Plasmoid.internalAction("configure");
+                    if (action) {
+                        action.trigger();
+                    }
+                }
+            }
+
+            Item { Layout.fillWidth: true }
+
+            PlasmaComponents.Button {
                 text: i18n("Open Merkuro")
                 icon.name: "view-calendar"
                 onClicked: full.openMerkuro()
