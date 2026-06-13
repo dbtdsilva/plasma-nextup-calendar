@@ -10,4 +10,9 @@ ConfigModel {
         icon: "view-calendar-upcoming"
         source: "configGeneral.qml"
     }
+    ConfigCategory {
+        name: i18n("Calendars")
+        icon: "office-calendar"
+        source: "configCalendars.qml"
+    }
 }
