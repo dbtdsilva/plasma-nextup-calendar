@@ -77,6 +77,7 @@ Item {
         }
         if (pluginEnabled) {
             enablePimPlugin();
+            refreshDebounce.restart();
         } else {
             pluginsManager.enabledPlugins = [];
             upcomingEvents = [];
@@ -136,6 +137,13 @@ Item {
     }
 
     function collect() {
+        if (!pluginEnabled) {
+            if (upcomingEvents.length > 0) {
+                upcomingEvents = [];
+                eventsChanged();
+            }
+            return;
+        }
         const todayStart = new Date();
         todayStart.setHours(0, 0, 0, 0);
         let all = [];
