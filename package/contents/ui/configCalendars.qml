@@ -65,5 +65,15 @@ Item {
                 }
             }
         }
+
+        Kirigami.PlaceholderMessage {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            Layout.alignment: Qt.AlignCenter
+            visible: page.pimConfigUi === ""
+            icon.name: "view-calendar-upcoming"
+            text: i18n("Calendar selection unavailable")
+            explanation: i18n("Install the kdepim-addons package to choose which calendars appear.")
+        }
     }
 }
