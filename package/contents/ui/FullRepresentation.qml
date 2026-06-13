@@ -32,8 +32,11 @@ PlasmaExtras.Representation {
         onNewData: sourceName => disconnectSource(sourceName)
     }
 
+    // Launch via the registered desktop file so it resolves regardless of
+    // binary name or Flatpak packaging; fall back to the bare binary on
+    // installs without kstart.
     function openMerkuro() {
-        executable.connectSource("merkuro-calendar");
+        executable.connectSource("kstart --application org.kde.merkuro.calendar || merkuro-calendar");
     }
 
     function activateEvent(description) {
