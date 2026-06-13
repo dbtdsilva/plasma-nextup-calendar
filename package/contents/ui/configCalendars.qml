@@ -4,6 +4,7 @@
 */
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Controls as QQC2
 import org.kde.kirigami as Kirigami
 import org.kde.plasma.workspace.calendar as PlasmaCalendar
 
@@ -12,6 +13,9 @@ Item {
 
     // Emitted to the config dialog so it enables the Apply button.
     signal configurationChanged()
+
+    // Bound to the config entry by the dialog; drives the integration + gating.
+    property alias cfg_pimEventsEnabled: enableSwitch.checked
 
     // URL of pimevents' PimEventsConfig.qml, discovered from the plugin model
     property string pimConfigUi: ""
@@ -44,6 +48,13 @@ Item {
         anchors.fill: parent
         spacing: Kirigami.Units.smallSpacing
 
+        QQC2.Switch {
+            id: enableSwitch
+            Layout.fillWidth: true
+            visible: page.pimConfigUi !== ""
+            text: i18n("Show calendar events (PIM Events plugin)")
+        }
+
         Kirigami.InlineMessage {
             Layout.fillWidth: true
             visible: page.pimConfigUi !== ""
@@ -57,6 +68,7 @@ Item {
             Layout.fillWidth: true
             Layout.fillHeight: page.pimConfigUi !== ""
             active: page.pimConfigUi !== ""
+            enabled: page.cfg_pimEventsEnabled
             source: page.pimConfigUi
             // Forward the picker's change signal so Apply enables and persists.
             onItemChanged: {
@@ -66,13 +78,20 @@ Item {
             }
         }
 
+        Kirigami.InlineMessage {
+            Layout.fillWidth: true
+            visible: page.pimConfigUi !== "" && !page.cfg_pimEventsEnabled
+            type: Kirigami.MessageType.Information
+            text: i18n("Turn on “Show calendar events” to choose which calendars appear.")
+        }
+
         Kirigami.PlaceholderMessage {
             Layout.fillWidth: true
             Layout.alignment: Qt.AlignCenter
             visible: page.pimConfigUi === ""
             icon.name: "view-calendar-upcoming"
             text: i18n("Calendar selection unavailable")
-            explanation: i18n("Install the kdepim-addons package to choose which calendars appear.")
+            explanation: i18n("Calendar events require the PIM Events plugin from the kdepim-addons package. Install it with your distribution's package manager, then reopen settings.")
         }
     }
 }
