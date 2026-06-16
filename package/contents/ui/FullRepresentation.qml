@@ -18,6 +18,7 @@ PlasmaExtras.Representation {
     required property var events
     required property bool pimAvailable
     required property int popupDays
+    required property bool hideAllDay
 
     Layout.preferredWidth: Kirigami.Units.gridUnit * 20
     Layout.preferredHeight: Kirigami.Units.gridUnit * 24
@@ -26,6 +27,7 @@ PlasmaExtras.Representation {
 
     onEventsChanged: rebuild()
     onPopupDaysChanged: rebuild()
+    onHideAllDayChanged: rebuild()
     Component.onCompleted: rebuild()
 
     P5Support.DataSource {
@@ -54,7 +56,7 @@ PlasmaExtras.Representation {
         agendaModel.clear();
         const now = new Date();
         const fmt = d => Qt.formatTime(d);
-        const groups = Logic.groupByDay(events, now, { popupDays: popupDays },
+        const groups = Logic.groupByDay(events, now, { popupDays: popupDays, hideAllDay: hideAllDay },
             d => Qt.formatDate(d, "dddd"));
         for (const group of groups) {
             for (const ev of group.events) {
