@@ -14,6 +14,15 @@ Kirigami.FormLayout {
     property alias cfg_urgentThresholdMinutes: urgentThreshold.value
     property alias cfg_placeholderText: placeholderText.text
     property alias cfg_popupDays: popupDays.value
+    property alias cfg_panelHideAllDay: panelHideAllDay.checked
+    property alias cfg_popupHideAllDay: popupHideAllDay.checked
+    property alias cfg_alertEnabled: alertEnabled.checked
+    property alias cfg_alertMinutesBefore: alertMinutesBefore.value
+
+    Kirigami.Separator {
+        Kirigami.FormData.label: i18n("Next up (panel)")
+        Kirigami.FormData.isSection: true
+    }
 
     QQC2.ComboBox {
         Kirigami.FormData.label: i18n("Show next event from:")
@@ -47,10 +56,46 @@ Kirigami.FormLayout {
         Kirigami.FormData.label: i18n("Text when no events:")
     }
 
+    QQC2.CheckBox {
+        id: panelHideAllDay
+        Kirigami.FormData.label: i18n("Hide all-day events:")
+        text: i18n("Don't show all-day events in the panel")
+    }
+
+    Kirigami.Separator {
+        Kirigami.FormData.label: i18n("Agenda popup")
+        Kirigami.FormData.isSection: true
+    }
+
     QQC2.SpinBox {
         id: popupDays
         Kirigami.FormData.label: i18n("Days shown in popup:")
         from: 1
         to: 14
+    }
+
+    QQC2.CheckBox {
+        id: popupHideAllDay
+        Kirigami.FormData.label: i18n("Hide all-day events:")
+        text: i18n("Don't show all-day events in the agenda")
+    }
+
+    Kirigami.Separator {
+        Kirigami.FormData.label: i18n("Alert")
+        Kirigami.FormData.isSection: true
+    }
+
+    QQC2.CheckBox {
+        id: alertEnabled
+        Kirigami.FormData.label: i18n("Notify before the next event:")
+        text: i18n("Show a desktop notification")
+    }
+
+    QQC2.SpinBox {
+        id: alertMinutesBefore
+        Kirigami.FormData.label: i18n("Minutes before:")
+        from: 1
+        to: 120
+        enabled: alertEnabled.checked
     }
 }
