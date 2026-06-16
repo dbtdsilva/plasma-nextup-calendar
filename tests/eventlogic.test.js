@@ -39,6 +39,11 @@ test("dedupe keeps the first occurrence of a duplicate", () => {
     assert.equal(out[0], a);
 });
 
+test("eventKey combines title and start epoch", () => {
+    const e = ev({ title: "Sync", startDateTime: new Date("2026-06-12T14:30:00") });
+    assert.equal(L.eventKey(e), "Sync|" + new Date("2026-06-12T14:30:00").getTime());
+});
+
 test("selectPanelEvent prefers ongoing event, earliest end first", () => {
     const ongoingLong = ev({ title: "Long", startDateTime: new Date("2026-06-12T12:00:00"), endDateTime: new Date("2026-06-12T16:00:00") });
     const ongoingShort = ev({ title: "Short", startDateTime: new Date("2026-06-12T12:30:00"), endDateTime: new Date("2026-06-12T13:30:00") });

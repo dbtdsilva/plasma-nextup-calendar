@@ -7,12 +7,16 @@
     of QML and Node APIs alike.
 */
 
+function eventKey(e) {
+    return e.title + "|" + e.startDateTime.getTime();
+}
+
 function dedupe(events) {
     var seen = {};
     var out = [];
     for (var i = 0; i < events.length; i++) {
         var e = events[i];
-        var key = e.title + "|" + e.startDateTime.getTime();
+        var key = eventKey(e);
         if (seen[key]) {
             continue;
         }
@@ -193,6 +197,7 @@ function findMeetingUrl(text) {
 if (typeof module !== "undefined" && module.exports) {
     module.exports = {
         dedupe: dedupe,
+        eventKey: eventKey,
         selectPanelEvent: selectPanelEvent,
         startOfDay: startOfDay,
         addDays: addDays,
