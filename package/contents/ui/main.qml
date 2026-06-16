@@ -4,12 +4,15 @@
 */
 import QtQuick
 import org.kde.plasma.plasmoid
+import org.kde.notification
 import "../js/eventlogic.js" as Logic
 
 PlasmoidItem {
     id: root
 
     property var panelModel: ({ text: "…", urgent: false })
+    // key of the event we have already alerted for; resets on widget reload
+    property string lastAlertedKey: ""
 
     preferredRepresentation: compactRepresentation
     toolTipMainText: panelModel.text
@@ -20,6 +23,13 @@ PlasmoidItem {
         daysAhead: Math.max(2, Plasmoid.configuration.popupDays)
         pluginEnabled: Plasmoid.configuration.pimEventsEnabled
         onEventsChanged: root.refresh()
+    }
+
+    Notification {
+        id: eventAlert
+        componentName: "plasma_workspace"
+        eventId: "notification"
+        iconName: "view-calendar-upcoming"
     }
 
     // re-render countdowns even when no data changes
@@ -38,12 +48,31 @@ PlasmoidItem {
     function refresh() {
         const now = new Date();
         const cfg = Plasmoid.configuration;
-        const selection = Logic.selectPanelEvent(backend.upcomingEvents, now, { lookahead: cfg.lookahead });
+        const selection = Logic.selectPanelEvent(backend.upcomingEvents, now, {
+            lookahead: cfg.lookahead,
+            hideAllDay: cfg.panelHideAllDay,
+        });
         root.panelModel = Logic.formatPanelText(selection, now, {
             maxTitleLength: cfg.maxTitleLength,
             urgentThresholdMinutes: cfg.urgentThresholdMinutes,
             placeholderText: cfg.placeholderText,
         }, d => Qt.formatTime(d));
+
+        const alert = Logic.evaluateAlert(selection, now, {
+            alertEnabled: cfg.alertEnabled,
+            alertMinutesBefore: cfg.alertMinutesBefore,
+        }, root.lastAlertedKey);
+        root.lastAlertedKey = alert.key;
+        if (alert.fire) {
+            root.fireAlert(selection.event, now);
+        }
+    }
+
+    function fireAlert(evnt, now) {
+        const mins = Math.ceil((evnt.startDateTime - now) / 60000);
+        eventAlert.title = evnt.title;
+        eventAlert.text = i18np("Starts in %1 minute", "Starts in %1 minutes", mins);
+        eventAlert.sendEvent();
     }
 
     compactRepresentation: CompactRepresentation {
@@ -56,5 +85,6 @@ PlasmoidItem {
         events: backend.upcomingEvents
         pimAvailable: backend.pimAvailable
         popupDays: Plasmoid.configuration.popupDays
+        hideAllDay: Plasmoid.configuration.popupHideAllDay
     }
 }
