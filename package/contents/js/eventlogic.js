@@ -139,6 +139,9 @@ function formatPanelText(selection, now, opts, fmtTime) {
 
 function groupByDay(events, now, opts, weekdayName) {
     var popupDays = (opts && opts.popupDays) || 7;
+    if (opts && opts.hideAllDay) {
+        events = events.filter(function (e) { return !e.isAllDay; });
+    }
     var todayStart = startOfDay(now);
     var groups = [];
     for (var i = 0; i < popupDays; i++) {

@@ -207,6 +207,18 @@ test("groupByDay respects popupDays window", () => {
     assert.equal(L.groupByDay([nextWeek], NOW, { popupDays: 7 }, d => "X").length, 0);
 });
 
+test("groupByDay hideAllDay drops all-day rows and empty days", () => {
+    const events = [
+        ev({ title: "Afternoon", startDateTime: new Date("2026-06-12T16:00:00"), endDateTime: new Date("2026-06-12T17:00:00") }),
+        ev({ title: "Holiday", isAllDay: true, startDateTime: new Date("2026-06-12T00:00:00"), endDateTime: new Date("2026-06-13T00:00:00") }),
+        ev({ title: "TripDay", isAllDay: true, startDateTime: new Date("2026-06-14T00:00:00"), endDateTime: new Date("2026-06-15T00:00:00") }),
+    ];
+    const groups = L.groupByDay(events, NOW, { popupDays: 7, hideAllDay: true }, d => "X");
+    assert.equal(groups.length, 1);
+    assert.equal(groups[0].label, "Today");
+    assert.deepEqual(groups[0].events.map(e => e.title), ["Afternoon"]);
+});
+
 test("timeRangeText renders range or All day", () => {
     assert.equal(L.timeRangeText(ev({}), FMT), "14:30–15:00");
     assert.equal(L.timeRangeText(ev({ isAllDay: true }), FMT), "All day");
