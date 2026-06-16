@@ -73,6 +73,21 @@ test("selectPanelEvent falls back to all-day, then none", () => {
     assert.equal(L.selectPanelEvent([], NOW, { lookahead: "todayTomorrow" }).kind, "none");
 });
 
+test("selectPanelEvent hideAllDay suppresses the all-day fallback", () => {
+    const allday = ev({ title: "Holiday", isAllDay: true, startDateTime: new Date("2026-06-12T00:00:00"), endDateTime: new Date("2026-06-13T00:00:00") });
+    assert.equal(L.selectPanelEvent([allday], NOW, { lookahead: "todayTomorrow", hideAllDay: true }).kind, "none");
+    // without the flag the all-day fallback still works (regression guard)
+    assert.equal(L.selectPanelEvent([allday], NOW, { lookahead: "todayTomorrow" }).kind, "allday");
+});
+
+test("selectPanelEvent hideAllDay still returns a timed upcoming event", () => {
+    const allday = ev({ title: "Holiday", isAllDay: true, startDateTime: new Date("2026-06-12T00:00:00"), endDateTime: new Date("2026-06-13T00:00:00") });
+    const timed = ev({ title: "Sync", startDateTime: new Date("2026-06-12T16:00:00"), endDateTime: new Date("2026-06-12T17:00:00") });
+    const sel = L.selectPanelEvent([allday, timed], NOW, { lookahead: "todayTomorrow", hideAllDay: true });
+    assert.equal(sel.kind, "upcoming");
+    assert.equal(sel.event.title, "Sync");
+});
+
 test("selectPanelEvent lookahead 'today' excludes tomorrow", () => {
     const tomorrow = ev({ startDateTime: new Date("2026-06-13T09:00:00"), endDateTime: new Date("2026-06-13T09:30:00") });
     const alldayTomorrow = ev({ title: "Trip", isAllDay: true, startDateTime: new Date("2026-06-13T00:00:00"), endDateTime: new Date("2026-06-14T00:00:00") });

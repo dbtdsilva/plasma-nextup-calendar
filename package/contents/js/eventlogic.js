@@ -73,11 +73,13 @@ function selectPanelEvent(events, now, opts) {
         return { kind: "upcoming", event: upcoming[0] };
     }
 
-    var allDay = events.filter(function (e) {
-        return e.isAllDay && e.endDateTime > now && e.startDateTime < windowEnd;
-    }).sort(function (a, b) { return a.startDateTime - b.startDateTime; });
-    if (allDay.length) {
-        return { kind: "allday", event: allDay[0] };
+    if (!(opts && opts.hideAllDay)) {
+        var allDay = events.filter(function (e) {
+            return e.isAllDay && e.endDateTime > now && e.startDateTime < windowEnd;
+        }).sort(function (a, b) { return a.startDateTime - b.startDateTime; });
+        if (allDay.length) {
+            return { kind: "allday", event: allDay[0] };
+        }
     }
 
     return { kind: "none", event: null };
