@@ -32,5 +32,21 @@
             <label>Show calendar events from the PIM Events plugin</label>
             <default>true</default>
         </entry>
+        <entry name="panelHideAllDay" type="Bool">
+            <label>Hide all-day events in the panel</label>
+            <default>false</default>
+        </entry>
+        <entry name="popupHideAllDay" type="Bool">
+            <label>Hide all-day events in the agenda popup</label>
+            <default>false</default>
+        </entry>
+        <entry name="alertEnabled" type="Bool">
+            <label>Show a notification before the next event</label>
+            <default>false</default>
+        </entry>
+        <entry name="alertMinutesBefore" type="Int">
+            <label>Minutes before the next event to notify</label>
+            <default>5</default>
+        </entry>
     </group>
 </kcfg>
