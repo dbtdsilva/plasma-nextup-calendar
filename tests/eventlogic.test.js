@@ -249,3 +249,42 @@ test("groupByDay labels the second day Tomorrow", () => {
     assert.equal(groups.length, 1);
     assert.equal(groups[0].label, "Tomorrow");
 });
+
+const ALERT_OPTS = { alertEnabled: true, alertMinutesBefore: 5 };
+
+test("evaluateAlert: disabled never fires", () => {
+    const sel = { kind: "upcoming", event: ev({ startDateTime: new Date("2026-06-12T13:03:00") }) };
+    assert.deepEqual(L.evaluateAlert(sel, NOW, { alertEnabled: false, alertMinutesBefore: 5 }, ""), { fire: false, key: "" });
+});
+
+test("evaluateAlert: fires once when upcoming within threshold", () => {
+    const sel = { kind: "upcoming", event: ev({ title: "Sync", startDateTime: new Date("2026-06-12T13:03:00") }) };
+    const out = L.evaluateAlert(sel, NOW, ALERT_OPTS, "");
+    assert.equal(out.fire, true);
+    assert.equal(out.key, L.eventKey(sel.event));
+    // already alerted for this event -> no re-fire, key preserved
+    const again = L.evaluateAlert(sel, NOW, ALERT_OPTS, out.key);
+    assert.deepEqual(again, { fire: false, key: out.key });
+});
+
+test("evaluateAlert: does not fire beyond threshold", () => {
+    const sel = { kind: "upcoming", event: ev({ startDateTime: new Date("2026-06-12T13:10:00") }) };
+    assert.deepEqual(L.evaluateAlert(sel, NOW, ALERT_OPTS, ""), { fire: false, key: "" });
+});
+
+test("evaluateAlert: non-upcoming selections never fire", () => {
+    const ongoing = { kind: "ongoing", event: ev({ startDateTime: new Date("2026-06-12T12:00:00"), endDateTime: new Date("2026-06-12T14:00:00") }) };
+    assert.equal(L.evaluateAlert(ongoing, NOW, ALERT_OPTS, "").fire, false);
+    const allday = { kind: "allday", event: ev({ isAllDay: true }) };
+    assert.equal(L.evaluateAlert(allday, NOW, ALERT_OPTS, "").fire, false);
+    assert.equal(L.evaluateAlert({ kind: "none", event: null }, NOW, ALERT_OPTS, "").fire, false);
+});
+
+test("evaluateAlert: a new event after a previous alert fires for the new key", () => {
+    const first = ev({ title: "First", startDateTime: new Date("2026-06-12T13:03:00") });
+    const firstKey = L.eventKey(first);
+    const second = { kind: "upcoming", event: ev({ title: "Second", startDateTime: new Date("2026-06-12T13:04:00") }) };
+    const out = L.evaluateAlert(second, NOW, ALERT_OPTS, firstKey);
+    assert.equal(out.fire, true);
+    assert.equal(out.key, L.eventKey(second.event));
+});

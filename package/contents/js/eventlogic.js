@@ -171,6 +171,22 @@ function groupByDay(events, now, opts, weekdayName) {
     return groups;
 }
 
+function evaluateAlert(selection, now, opts, lastAlertedKey) {
+    var o = opts || {};
+    if (!o.alertEnabled || !selection || selection.kind !== "upcoming") {
+        return { fire: false, key: lastAlertedKey };
+    }
+    var key = eventKey(selection.event);
+    if (key === lastAlertedKey) {
+        return { fire: false, key: lastAlertedKey };
+    }
+    var mins = Math.ceil((selection.event.startDateTime - now) / 60000);
+    if (mins <= o.alertMinutesBefore) {
+        return { fire: true, key: key };
+    }
+    return { fire: false, key: lastAlertedKey };
+}
+
 function timeRangeText(evnt, fmtTime) {
     fmtTime = fmtTime || defaultTimeFormat;
     if (evnt.isAllDay) {
@@ -211,6 +227,7 @@ if (typeof module !== "undefined" && module.exports) {
         truncateTitle: truncateTitle,
         defaultTimeFormat: defaultTimeFormat,
         groupByDay: groupByDay,
+        evaluateAlert: evaluateAlert,
         timeRangeText: timeRangeText,
         findMeetingUrl: findMeetingUrl,
     };
