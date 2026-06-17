@@ -1,5 +1,7 @@
 # Next Up Calendar — Plasma Widget
 
+[![Release](https://img.shields.io/github/v/release/dbtdsilva/plasma-nextup-calendar)](https://github.com/dbtdsilva/plasma-nextup-calendar/releases)
+
 Shows your next calendar event as text in the Plasma panel — the Plasma
 equivalent of GNOME's [Next Up](https://extensions.gnome.org/extension/5278/next-up/)
 extension. Click it for a multi-day agenda popup; click a meeting to join
@@ -47,6 +49,20 @@ Then add **Next Up Calendar** to your panel via *Add Widgets*.
 
 Logic is pure JavaScript with tests: `node --test`
 Preview: `plasmoidviewer --applet ./package`
+
+## Releasing
+
+Releases are cut manually from the **Actions** tab:
+
+1. Open **Actions → Release → Run workflow**.
+2. Enter the **version** (`X.Y.Z`), a **title**, and **notes** (markdown).
+3. Run it. The workflow runs the tests, bumps `KPlugin.Version` in
+   `package/metadata.json`, tags `X.Y.Z`, pushes to `main`, and publishes a
+   GitHub Release with `next-up-calendar-X.Y.Z.plasmoid` attached.
+
+Install a released build by downloading the `.plasmoid` from the release page,
+then `kpackagetool6 -t Plasma/Applet -i next-up-calendar-X.Y.Z.plasmoid` (or
+*Add Widgets → Get New Widgets → Install Widget From Local File…*).
 
 ## Limitations
 
