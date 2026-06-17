@@ -10,7 +10,7 @@ import "../js/eventlogic.js" as Logic
 PlasmoidItem {
     id: root
 
-    property var panelModel: ({ text: "…", urgent: false })
+    property var panelModel: ({ text: "…", status: "clear" })
     // key of the event we have already alerted for; resets on widget reload
     property string lastAlertedKey: ""
 

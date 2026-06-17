@@ -12,7 +12,7 @@ import org.kde.plasma.plasmoid
 Item {
     id: compactRoot
 
-    // {text: string, urgent: bool} — computed in main.qml
+    // { text: string, status: "ongoing" | "soon" | "clear" } — computed in main.qml
     required property var panelModel
     // current popup state, captured at press time for reliable click-to-close
     required property bool isExpanded
@@ -21,22 +21,44 @@ Item {
 
     readonly property bool vertical: Plasmoid.formFactor === PlasmaCore.Types.Vertical
 
-    // horizontal panel: claim the text's width; vertical panel: claim the
-    // text's height and let the panel's thickness bound the width (elide)
-    Layout.preferredWidth: vertical ? -1 : label.implicitWidth + Kirigami.Units.smallSpacing * 2
+    // red = on a meeting, orange = starting soon, green = all clear
+    readonly property color statusColor: {
+        switch (compactRoot.panelModel.status) {
+        case "ongoing": return Kirigami.Theme.negativeTextColor;
+        case "soon": return Kirigami.Theme.neutralTextColor;
+        default: return Kirigami.Theme.positiveTextColor;
+        }
+    }
+
+    // horizontal panel: claim the row's width; vertical panel: claim its height
+    // and let the panel's thickness bound the width (label elides)
+    Layout.preferredWidth: vertical ? -1 : row.implicitWidth + Kirigami.Units.smallSpacing * 2
     Layout.minimumWidth: vertical ? 0 : Layout.preferredWidth
     Layout.preferredHeight: vertical ? label.implicitHeight + Kirigami.Units.smallSpacing * 2 : -1
 
-    PlasmaComponents.Label {
-        id: label
+    RowLayout {
+        id: row
         anchors.fill: parent
-        horizontalAlignment: Text.AlignHCenter
-        verticalAlignment: Text.AlignVCenter
-        elide: Text.ElideRight
-        text: compactRoot.panelModel.text
-        color: compactRoot.panelModel.urgent
-            ? Kirigami.Theme.negativeTextColor
-            : Kirigami.Theme.textColor
+        spacing: Kirigami.Units.smallSpacing
+
+        Rectangle {
+            id: dot
+            Layout.alignment: Qt.AlignVCenter
+            implicitWidth: Kirigami.Units.smallSpacing * 2
+            implicitHeight: implicitWidth
+            radius: width / 2
+            color: compactRoot.statusColor
+        }
+
+        PlasmaComponents.Label {
+            id: label
+            Layout.fillWidth: true
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+            elide: Text.ElideRight
+            text: compactRoot.panelModel.text
+            color: Kirigami.Theme.textColor
+        }
     }
 
     MouseArea {
