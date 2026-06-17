@@ -46,7 +46,7 @@ Kirigami.FormLayout {
 
     QQC2.SpinBox {
         id: urgentThreshold
-        Kirigami.FormData.label: i18n("Highlight when starting within (minutes):")
+        Kirigami.FormData.label: i18n("Turn the status dot orange within (minutes):")
         from: 0
         to: 60
     }

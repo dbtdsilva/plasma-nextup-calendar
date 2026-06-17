@@ -17,7 +17,7 @@
             <default>30</default>
         </entry>
         <entry name="urgentThresholdMinutes" type="Int">
-            <label>Highlight the panel text when the event starts within this many minutes</label>
+            <label>Minutes-before threshold that turns the panel status dot orange</label>
             <default>5</default>
         </entry>
         <entry name="placeholderText" type="String">
