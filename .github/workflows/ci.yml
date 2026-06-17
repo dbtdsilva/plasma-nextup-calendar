@@ -41,26 +41,35 @@ jobs:
 
   validate:
     runs-on: ubuntu-latest
+    # GitHub's ubuntu-latest runner is 24.04, which ships Plasma 5 / KF5 (no
+    # kpackagetool6, no Qt6 Kirigami). Run in an ubuntu:26.04 container — it has
+    # the full Plasma 6 / Qt6 / KF6 stack, matching the versions the widget
+    # targets, so qmllint resolves every import and kpackagetool6 exists.
+    container: ubuntu:26.04
+    env:
+      DEBIAN_FRONTEND: noninteractive
+      LC_ALL: C.UTF-8
     steps:
+      # Install before checkout so git is present for actions/checkout.
+      # --no-install-recommends stays lean; plasma-workspace's hard deps already
+      # provide the org.kde.plasma.* QML plugins qmllint needs.
+      - name: Install Plasma 6 toolchain
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends \
+            git ca-certificates \
+            qt6-declarative-dev-tools \
+            qml6-module-qtquick qml6-module-qtquick-controls qml6-module-qtquick-layouts \
+            qml6-module-org-kde-kirigami \
+            plasma-workspace kpackagetool6
+
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Install Qt6 qmllint, QML modules, and kpackagetool6
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends \
-            qt6-declarative-dev-tools \
-            qml6-module-qtquick \
-            qml6-module-qtquick-controls \
-            qml6-module-qtquick-layouts \
-            qml6-module-org-kde-kirigami \
-            plasma-workspace \
-            plasma-sdk
-
       - name: Lint QML
         run: |
+          export PATH="/usr/lib/qt6/bin:$PATH"
           qmllint package/contents/ui/*.qml package/contents/config/config.qml
 
       - name: Validate plasmoid package
-        run: |
-          kpackagetool6 --type Plasma/Applet --install package --packageroot "$(mktemp -d)"
+        run: kpackagetool6 --type Plasma/Applet --install package --packageroot "$(mktemp -d)"

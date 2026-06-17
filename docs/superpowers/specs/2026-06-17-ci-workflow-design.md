@@ -1,8 +1,21 @@
 # CI Verification Workflow — Design
 
 **Date:** 2026-06-17
-**Status:** Approved
+**Status:** Approved (validate job revised — see Revision below)
 **Repo:** https://github.com/dbtdsilva/plasma-nextup-calendar
+
+> **Revision (2026-06-17):** The original `validate` job apt-installed the Qt6/KF6
+> stack directly on `ubuntu-latest`. That fails: GitHub's `ubuntu-latest` runner
+> is **24.04 (noble)**, which ships **Plasma 5 / KF5** — no `kpackagetool6`, no Qt6
+> Kirigami QML module. Verified against the noble archive. The job now runs inside
+> a **`container: ubuntu:26.04`**, which carries the full Plasma 6 / Qt6 / KF6 stack
+> (matching the versions the widget targets), with the toolchain apt-installed
+> there (`qt6-declarative-dev-tools`, `qml6-module-qtquick{,-controls,-layouts}`,
+> `qml6-module-org-kde-kirigami`, `plasma-workspace`, `kpackagetool6`). Verified
+> locally in that container against the real sources: `qmllint` exits 0 (all
+> imports resolve; only non-fatal unqualified-access warnings) and `kpackagetool6`
+> validates the package. The `.qmllint.ini` import-downgrade is **dropped** — every
+> import resolves in this image, so it is unnecessary. The `test` job is unchanged.
 
 ## Purpose
 
