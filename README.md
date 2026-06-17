@@ -1,5 +1,6 @@
 # Next Up Calendar — Plasma Widget
 
+[![CI](https://github.com/dbtdsilva/plasma-nextup-calendar/actions/workflows/ci.yml/badge.svg)](https://github.com/dbtdsilva/plasma-nextup-calendar/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/dbtdsilva/plasma-nextup-calendar)](https://github.com/dbtdsilva/plasma-nextup-calendar/releases)
 
 Shows your next calendar event as text in the Plasma panel — the Plasma
