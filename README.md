@@ -44,7 +44,13 @@ popup says it found no events, enable them once:
 
     ./install.sh
 
-Then add **Next Up Calendar** to your panel via *Add Widgets*.
+Restart Plasma so it registers the new widget (needed before it shows up in the
+list):
+
+    systemctl --user restart plasma-plasmashell.service
+
+Then add it: right-click the panel or desktop → **Add Widgets…**, search for
+**Next Up Calendar**, and drag it onto the panel.
 
 ## Development
 

@@ -87,12 +87,20 @@ jobs:
 
             ## Install
 
-            Download `next-up-calendar-${{ inputs.version }}.plasmoid` below, then:
+            Download `next-up-calendar-${{ inputs.version }}.plasmoid` below, then install it:
 
             ```
             kpackagetool6 -t Plasma/Applet -i next-up-calendar-${{ inputs.version }}.plasmoid
             ```
 
-            Or use *Add Widgets → Get New Widgets → Install Widget From Local File…*.
+            (or *Add Widgets → Get New Widgets → Install Widget From Local File…*)
+
+            Restart Plasma so it registers the widget (needed before it appears):
+
+            ```
+            systemctl --user restart plasma-plasmashell.service
+            ```
+
+            Then add it: right-click the panel or desktop → **Add Widgets…**, search for **Next Up Calendar**, and drag it in.
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

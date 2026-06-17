@@ -15,6 +15,6 @@ else
 fi
 
 echo
-echo "Installed. Add it via panel right-click > Add Widgets > 'Next Up Calendar'."
-echo "If an older version appears cached, restart plasmashell:"
+echo "Installed. Restart Plasma so it registers the widget (needed before it appears):"
 echo "  systemctl --user restart plasma-plasmashell.service"
+echo "Then add it: panel/desktop right-click > Add Widgets… > 'Next Up Calendar'."
