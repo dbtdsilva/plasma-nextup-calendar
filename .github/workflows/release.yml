@@ -1,0 +1,98 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to release (e.g. 0.2.0)"
+        required: true
+        type: string
+      title:
+        description: "Release title (e.g. Filters & alerts)"
+        required: true
+        type: string
+      notes:
+        description: "Release notes (markdown)"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      VERSION: ${{ inputs.version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 20
+
+      - name: Validate inputs
+        run: |
+          if ! printf '%s' "$VERSION" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "::error::version must be X.Y.Z (got '$VERSION')"
+            exit 1
+          fi
+          if git ls-remote --exit-code --tags origin "refs/tags/$VERSION" >/dev/null 2>&1; then
+            echo "::error::tag '$VERSION' already exists on origin"
+            exit 1
+          fi
+
+      - name: Run logic tests
+        run: node --test tests/eventlogic.test.js
+
+      - name: Bump metadata.json version
+        run: |
+          node -e "
+            const fs = require('fs'), p = 'package/metadata.json';
+            const m = JSON.parse(fs.readFileSync(p, 'utf8'));
+            m.KPlugin.Version = process.env.VERSION;
+            fs.writeFileSync(p, JSON.stringify(m, null, 4) + '\n');
+          "
+          echo "Set KPlugin.Version to $VERSION"
+
+      - name: Package .plasmoid
+        run: |
+          cd package && zip -r "../next-up-calendar-$VERSION.plasmoid" . && cd ..
+          ls -l "next-up-calendar-$VERSION.plasmoid"
+
+      - name: Commit and tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add package/metadata.json
+          git commit -m "chore: bump version to $VERSION"
+          git tag "$VERSION"
+          git push origin HEAD:main
+          git push origin "$VERSION"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: ${{ inputs.version }}
+          name: "${{ inputs.version }} — ${{ inputs.title }}"
+          files: next-up-calendar-${{ inputs.version }}.plasmoid
+          body: |
+            ${{ inputs.notes }}
+
+            ## Install
+
+            Download `next-up-calendar-${{ inputs.version }}.plasmoid` below, then:
+
+            ```
+            kpackagetool6 -t Plasma/Applet -i next-up-calendar-${{ inputs.version }}.plasmoid
+            ```
+
+            Or use *Add Widgets → Get New Widgets → Install Widget From Local File…*.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
