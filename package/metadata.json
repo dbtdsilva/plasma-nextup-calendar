@@ -13,7 +13,7 @@
         "Id": "com.github.dbtdsilva.nextupcalendar",
         "License": "GPL-2.0-or-later",
         "Name": "Next Up Calendar",
-        "Version": "0.1.0",
+        "Version": "1.0.0",
         "Website": "https://github.com/dbtdsilva/plasma-nextup-calendar"
     },
     "X-Plasma-API-Minimum-Version": "6.0"
