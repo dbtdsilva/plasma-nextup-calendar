@@ -114,27 +114,27 @@ function formatPanelText(selection, now, opts, fmtTime) {
     var placeholder = o.placeholderText || "No upcoming events";
 
     if (!selection || selection.kind === "none") {
-        return { text: placeholder, urgent: false };
+        return { text: placeholder, status: "clear" };
     }
     var evnt = selection.event;
     var title = truncateTitle(evnt.title, maxLen);
 
     if (selection.kind === "ongoing") {
-        return { text: title + " · ends " + fmtTime(evnt.endDateTime), urgent: false };
+        return { text: title + " · ends " + fmtTime(evnt.endDateTime), status: "ongoing" };
     }
     if (selection.kind === "allday") {
         var suffix = (evnt.startDateTime <= now || isSameDay(evnt.startDateTime, now)) ? " · all day" : " · tomorrow";
-        return { text: title + suffix, urgent: false };
+        return { text: title + suffix, status: "clear" };
     }
     // upcoming
     var mins = Math.ceil((evnt.startDateTime - now) / 60000);
     if (mins <= 60) {
-        return { text: title + " · in " + mins + " min", urgent: mins <= urgentMin };
+        return { text: title + " · in " + mins + " min", status: mins <= urgentMin ? "soon" : "clear" };
     }
     if (isSameDay(evnt.startDateTime, now)) {
-        return { text: title + " · " + fmtTime(evnt.startDateTime), urgent: false };
+        return { text: title + " · " + fmtTime(evnt.startDateTime), status: "clear" };
     }
-    return { text: title + " · tomorrow " + fmtTime(evnt.startDateTime), urgent: false };
+    return { text: title + " · tomorrow " + fmtTime(evnt.startDateTime), status: "clear" };
 }
 
 function groupByDay(events, now, opts, weekdayName) {

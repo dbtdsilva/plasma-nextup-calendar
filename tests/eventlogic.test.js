@@ -124,16 +124,16 @@ test("selectPanelEvent boundary: start exactly at windowEnd is excluded", () => 
 const FMT = d => `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
 const OPTS = { maxTitleLength: 30, urgentThresholdMinutes: 5, placeholderText: "No upcoming events" };
 
-test("formatPanelText: ongoing shows end time", () => {
+test("formatPanelText: ongoing shows end time, status ongoing", () => {
     const sel = { kind: "ongoing", event: ev({ endDateTime: new Date("2026-06-12T15:00:00") }) };
-    assert.deepEqual(L.formatPanelText(sel, NOW, OPTS, FMT), { text: "Standup · ends 15:00", urgent: false });
+    assert.deepEqual(L.formatPanelText(sel, NOW, OPTS, FMT), { text: "Standup · ends 15:00", status: "ongoing" });
 });
 
-test("formatPanelText: imminent shows countdown, urgent at threshold", () => {
+test("formatPanelText: imminent shows countdown; soon within threshold", () => {
     const at1310 = { kind: "upcoming", event: ev({ startDateTime: new Date("2026-06-12T13:10:00") }) };
-    assert.deepEqual(L.formatPanelText(at1310, NOW, OPTS, FMT), { text: "Standup · in 10 min", urgent: false });
+    assert.deepEqual(L.formatPanelText(at1310, NOW, OPTS, FMT), { text: "Standup · in 10 min", status: "clear" });
     const at1304 = { kind: "upcoming", event: ev({ startDateTime: new Date("2026-06-12T13:04:00") }) };
-    assert.deepEqual(L.formatPanelText(at1304, NOW, OPTS, FMT), { text: "Standup · in 4 min", urgent: true });
+    assert.deepEqual(L.formatPanelText(at1304, NOW, OPTS, FMT), { text: "Standup · in 4 min", status: "soon" });
 });
 
 test("formatPanelText: later today shows start time, tomorrow says tomorrow", () => {
@@ -143,12 +143,12 @@ test("formatPanelText: later today shows start time, tomorrow says tomorrow", ()
     assert.equal(L.formatPanelText(tomorrow, NOW, OPTS, FMT).text, "Standup · tomorrow 09:00");
 });
 
-test("formatPanelText: all-day variants and placeholder", () => {
+test("formatPanelText: all-day variants and placeholder are status clear", () => {
     const today = { kind: "allday", event: ev({ title: "Holiday", isAllDay: true, startDateTime: new Date("2026-06-12T00:00:00"), endDateTime: new Date("2026-06-13T00:00:00") }) };
-    assert.equal(L.formatPanelText(today, NOW, OPTS, FMT).text, "Holiday · all day");
+    assert.deepEqual(L.formatPanelText(today, NOW, OPTS, FMT), { text: "Holiday · all day", status: "clear" });
     const tomorrow = { kind: "allday", event: ev({ title: "Trip", isAllDay: true, startDateTime: new Date("2026-06-13T00:00:00"), endDateTime: new Date("2026-06-14T00:00:00") }) };
-    assert.equal(L.formatPanelText(tomorrow, NOW, OPTS, FMT).text, "Trip · tomorrow");
-    assert.deepEqual(L.formatPanelText({ kind: "none", event: null }, NOW, OPTS, FMT), { text: "No upcoming events", urgent: false });
+    assert.deepEqual(L.formatPanelText(tomorrow, NOW, OPTS, FMT), { text: "Trip · tomorrow", status: "clear" });
+    assert.deepEqual(L.formatPanelText({ kind: "none", event: null }, NOW, OPTS, FMT), { text: "No upcoming events", status: "clear" });
 });
 
 test("formatPanelText truncates long titles with ellipsis", () => {
@@ -162,9 +162,11 @@ test("formatPanelText rounds sub-minute countdown up to 1", () => {
     assert.equal(L.formatPanelText(sel, NOW, OPTS, FMT).text, "Standup · in 1 min");
 });
 
-test("formatPanelText: urgent at exactly the threshold", () => {
+test("formatPanelText: soon at exactly the threshold, clear one minute beyond", () => {
     const at1305 = { kind: "upcoming", event: ev({ startDateTime: new Date("2026-06-12T13:05:00") }) };
-    assert.deepEqual(L.formatPanelText(at1305, NOW, OPTS, FMT), { text: "Standup · in 5 min", urgent: true });
+    assert.deepEqual(L.formatPanelText(at1305, NOW, OPTS, FMT), { text: "Standup · in 5 min", status: "soon" });
+    const at1306 = { kind: "upcoming", event: ev({ startDateTime: new Date("2026-06-12T13:06:00") }) };
+    assert.deepEqual(L.formatPanelText(at1306, NOW, OPTS, FMT), { text: "Standup · in 6 min", status: "clear" });
 });
 
 test("formatPanelText: countdown at exactly 60 min, time form at 61", () => {
