@@ -166,12 +166,20 @@ Item {
     P5Support.DataSource {
         id: syncExecutable
         engine: "executable"
-        onNewData: sourceName => disconnectSource(sourceName)
+        // Stamp the refresh time when the sync command finishes, so the popup's
+        // "Updated" reflects every refresh attempt (the cadence), not only data
+        // changes (which arrive later via agendaUpdated -> collect()). Disconnect
+        // so the same source can run again next interval.
+        onNewData: sourceName => {
+            backend.lastRefresh = new Date();
+            disconnectSource(sourceName);
+        }
     }
 
-    readonly property string syncCommand: 'QDBUS=$(command -v qdbus6 || command -v qdbus); [ -n "$QDBUS" ] || exit 0; for id in $("$QDBUS" org.freedesktop.Akonadi.Control /AgentManager org.freedesktop.Akonadi.AgentManager.agentInstances); do t=$("$QDBUS" org.freedesktop.Akonadi.Control /AgentManager org.freedesktop.Akonadi.AgentManager.agentInstanceType "$id"); case "$t" in akonadi_ews_resource|akonadi_davgroupware_resource|akonadi_google_resource|akonadi_ical_resource|akonadi_icaldir_resource|akonadi_openxchange_resource|akonadi_kalarm_resource) "$QDBUS" org.freedesktop.Akonadi.Resource."$id" / org.freedesktop.Akonadi.Resource.synchronize ;; esac; done'
+    readonly property string syncCommand: 'QDBUS=$(command -v qdbus6 || command -v qdbus); [ -n "$QDBUS" ] || exit 0; for id in $("$QDBUS" org.freedesktop.Akonadi.Control /AgentManager org.freedesktop.Akonadi.AgentManager.agentInstances); do t=$("$QDBUS" org.freedesktop.Akonadi.Control /AgentManager org.freedesktop.Akonadi.AgentManager.agentInstanceType "$id"); case "$t" in akonadi_ews_resource|akonadi_davgroupware_resource|akonadi_google_resource|akonadi_ical_resource|akonadi_icaldir_resource|akonadi_openxchange_resource|akonadi_kalarm_resource) "$QDBUS" org.freedesktop.Akonadi.Resource."$id" / org.freedesktop.Akonadi.Resource.synchronize ;; esac; done; echo synced'
 
     function syncCalendars() {
+        console.info("[nextup] forcing calendar sync");
         syncExecutable.connectSource(backend.syncCommand);
     }
 
