@@ -46,8 +46,10 @@ Item {
         Rectangle {
             id: dot
             Layout.alignment: Qt.AlignVCenter
-            implicitWidth: Kirigami.Units.smallSpacing * 2
-            implicitHeight: implicitWidth
+            // 10px to match the claudeusage widget's status dot (fixed, not
+            // Units-scaled, so it's the same physical size next to it)
+            implicitWidth: 10
+            implicitHeight: 10
             radius: width / 2
             color: compactRoot.statusColor
         }
