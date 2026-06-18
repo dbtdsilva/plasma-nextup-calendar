@@ -22,6 +22,7 @@ PlasmoidItem {
         id: backend
         daysAhead: Math.max(2, Plasmoid.configuration.popupDays)
         pluginEnabled: Plasmoid.configuration.pimEventsEnabled
+        refreshIntervalMinutes: Plasmoid.configuration.refreshIntervalMinutes
         onEventsChanged: root.refresh()
     }
 

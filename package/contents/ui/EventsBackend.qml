@@ -8,6 +8,7 @@
 import QtQuick
 import QtQml
 import org.kde.plasma.workspace.calendar as PlasmaCalendar
+import org.kde.plasma.plasma5support as P5Support
 import "../js/eventlogic.js" as Logic
 
 Item {
@@ -25,6 +26,10 @@ Item {
     // stored "false" resolves a moment later, which would destabilise the shared
     // calendar plugin and crash other consumers (the Digital Clock).
     property bool pluginEnabled: false
+    // minutes between forced calendar syncs (fed from config); 0 = off
+    property int refreshIntervalMinutes: 0
+    // timestamp of the last successful collect() (a Date), shown in the popup
+    property var lastRefresh
     property string lastDayStamp: new Date().toDateString()
 
     onDaysAheadChanged: refreshDebounce.restart()
@@ -153,6 +158,31 @@ Item {
         }
     }
 
+    // Force a sync of the calendar Akonadi resource(s) on an interval — the same
+    // thing Merkuro's "Update Calendar" does. New server-side events otherwise may
+    // not reach Akonadi until a manual sync (e.g. a stale EWS push subscription).
+    // The sync makes Akonadi fetch; the existing agendaUpdated -> collect() path
+    // then refreshes the UI. Resources are auto-discovered by agent type.
+    P5Support.DataSource {
+        id: syncExecutable
+        engine: "executable"
+        onNewData: sourceName => disconnectSource(sourceName)
+    }
+
+    readonly property string syncCommand: 'QDBUS=$(command -v qdbus6 || command -v qdbus); [ -n "$QDBUS" ] || exit 0; for id in $("$QDBUS" org.freedesktop.Akonadi.Control /AgentManager org.freedesktop.Akonadi.AgentManager.agentInstances); do t=$("$QDBUS" org.freedesktop.Akonadi.Control /AgentManager org.freedesktop.Akonadi.AgentManager.agentInstanceType "$id"); case "$t" in akonadi_ews_resource|akonadi_davgroupware_resource|akonadi_google_resource|akonadi_ical_resource|akonadi_icaldir_resource|akonadi_openxchange_resource|akonadi_kalarm_resource) "$QDBUS" org.freedesktop.Akonadi.Resource."$id" / org.freedesktop.Akonadi.Resource.synchronize ;; esac; done'
+
+    function syncCalendars() {
+        syncExecutable.connectSource(backend.syncCommand);
+    }
+
+    Timer {
+        interval: Math.max(1, backend.refreshIntervalMinutes) * 60000
+        running: backend.refreshIntervalMinutes > 0 && backend.pluginEnabled
+        repeat: true
+        triggeredOnStart: true
+        onTriggered: backend.syncCalendars()
+    }
+
     function collect() {
         if (!pluginEnabled) {
             if (upcomingEvents.length > 0) {
@@ -181,6 +211,7 @@ Item {
             }
         }
         upcomingEvents = Logic.dedupe(all);
+        lastRefresh = new Date();
         console.info("[nextup] collected", upcomingEvents.length, "events for", daysAhead, "days");
         eventsChanged();
     }
