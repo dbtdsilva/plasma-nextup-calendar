@@ -158,11 +158,17 @@ Item {
         }
     }
 
-    // Force a sync of the calendar Akonadi resource(s) on an interval — the same
-    // thing Merkuro's "Update Calendar" does. New server-side events otherwise may
-    // not reach Akonadi until a manual sync (e.g. a stale EWS push subscription).
+    // Force a sync on an interval so server-side changes appear without a manual
+    // sync. We replicate exactly what Merkuro's "Update Calendar" does — a
+    // per-collection synchronizeCollection(<id>, false) on each enabled calendar —
+    // which fetches that folder immediately. (A resource-wide synchronize() is
+    // incremental and lags 2-3 cycles before EWS yields a fresh change — verified
+    // via dbus-monitor: Merkuro calls synchronizeCollection, not synchronize.)
+    // The enabled calendar collection ids come from the PIM Events plugin's own
+    // config (~/.config/plasmashellrc); calendar resources are auto-discovered by
+    // agent type; falls back to resource-wide synchronize() if no ids are found.
     // The sync makes Akonadi fetch; the existing agendaUpdated -> collect() path
-    // then refreshes the UI. Resources are auto-discovered by agent type.
+    // then refreshes the UI.
     P5Support.DataSource {
         id: syncExecutable
         engine: "executable"
@@ -176,7 +182,7 @@ Item {
         }
     }
 
-    readonly property string syncCommand: 'QDBUS=$(command -v qdbus6 || command -v qdbus); [ -n "$QDBUS" ] || exit 0; for id in $("$QDBUS" org.freedesktop.Akonadi.Control /AgentManager org.freedesktop.Akonadi.AgentManager.agentInstances); do t=$("$QDBUS" org.freedesktop.Akonadi.Control /AgentManager org.freedesktop.Akonadi.AgentManager.agentInstanceType "$id"); case "$t" in akonadi_ews_resource|akonadi_davgroupware_resource|akonadi_google_resource|akonadi_ical_resource|akonadi_icaldir_resource|akonadi_openxchange_resource|akonadi_kalarm_resource) "$QDBUS" org.freedesktop.Akonadi.Resource."$id" / org.freedesktop.Akonadi.Resource.synchronize ;; esac; done; echo synced'
+    readonly property string syncCommand: 'QDBUS=$(command -v qdbus6 || command -v qdbus); [ -n "$QDBUS" ] || exit 0; CALS=$(grep -A20 "PIMEventsPlugin" "$HOME/.config/plasmashellrc" 2>/dev/null | grep -m1 "^calendars=" | cut -d= -f2 | tr "," " "); for id in $("$QDBUS" org.freedesktop.Akonadi.Control /AgentManager org.freedesktop.Akonadi.AgentManager.agentInstances); do t=$("$QDBUS" org.freedesktop.Akonadi.Control /AgentManager org.freedesktop.Akonadi.AgentManager.agentInstanceType "$id"); case "$t" in akonadi_ews_resource|akonadi_davgroupware_resource|akonadi_google_resource|akonadi_ical_resource|akonadi_icaldir_resource|akonadi_openxchange_resource|akonadi_kalarm_resource|akonadi_birthdays_resource) if [ -n "$CALS" ]; then for c in $CALS; do "$QDBUS" org.freedesktop.Akonadi.Resource."$id" / org.freedesktop.Akonadi.Resource.synchronizeCollection "$c" false; done; else "$QDBUS" org.freedesktop.Akonadi.Resource."$id" / org.freedesktop.Akonadi.Resource.synchronize; fi ;; esac; done; echo synced'
 
     function syncCalendars() {
         console.info("[nextup] forcing calendar sync");
