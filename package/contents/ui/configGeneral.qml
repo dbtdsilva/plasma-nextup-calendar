@@ -15,6 +15,7 @@ Kirigami.FormLayout {
     property alias cfg_placeholderText: placeholderText.text
     property alias cfg_popupDays: popupDays.value
     property alias cfg_panelHideAllDay: panelHideAllDay.checked
+    property alias cfg_panelBold: panelBold.checked
     property alias cfg_popupHideAllDay: popupHideAllDay.checked
     property alias cfg_alertEnabled: alertEnabled.checked
 
@@ -59,6 +60,12 @@ Kirigami.FormLayout {
         id: panelHideAllDay
         Kirigami.FormData.label: i18n("Hide all-day events:")
         text: i18n("Don't show all-day events in the panel")
+    }
+
+    QQC2.CheckBox {
+        id: panelBold
+        Kirigami.FormData.label: i18n("Bold panel text:")
+        text: i18n("Show the event in bold")
     }
 
     Kirigami.Separator {

@@ -16,6 +16,8 @@ Item {
     required property var panelModel
     // current popup state, captured at press time for reliable click-to-close
     required property bool isExpanded
+    // bold the panel text (from Plasmoid.configuration.panelBold)
+    required property bool bold
 
     signal activated(bool wasExpanded)
 
@@ -58,6 +60,7 @@ Item {
             elide: Text.ElideRight
             text: compactRoot.panelModel.text
             color: Kirigami.Theme.textColor
+            font.bold: compactRoot.bold
         }
     }
 

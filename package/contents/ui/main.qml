@@ -78,6 +78,7 @@ PlasmoidItem {
     compactRepresentation: CompactRepresentation {
         panelModel: root.panelModel
         isExpanded: root.expanded
+        bold: Plasmoid.configuration.panelBold
         onActivated: wasExpanded => root.expanded = !wasExpanded
     }
 

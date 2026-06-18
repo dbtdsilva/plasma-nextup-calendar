@@ -36,6 +36,10 @@
             <label>Hide all-day events in the panel</label>
             <default>false</default>
         </entry>
+        <entry name="panelBold" type="Bool">
+            <label>Show the panel event text in bold</label>
+            <default>false</default>
+        </entry>
         <entry name="popupHideAllDay" type="Bool">
             <label>Hide all-day events in the agenda popup</label>
             <default>false</default>
