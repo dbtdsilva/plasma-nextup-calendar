@@ -19,6 +19,8 @@ PlasmaExtras.Representation {
     required property bool pimAvailable
     required property int popupDays
     required property bool hideAllDay
+    // Date of the last successful collect() (from EventsBackend); may be undefined
+    required property var lastRefresh
 
     Layout.preferredWidth: Kirigami.Units.gridUnit * 20
     Layout.preferredHeight: Kirigami.Units.gridUnit * 24
@@ -161,6 +163,15 @@ PlasmaExtras.Representation {
         RowLayout {
             anchors.fill: parent
 
+            PlasmaComponents.Label {
+                text: full.lastRefresh ? i18n("Updated %1", Qt.formatTime(full.lastRefresh, "hh:mm:ss")) : ""
+                opacity: 0.7
+                font: Kirigami.Theme.smallFont
+                Layout.alignment: Qt.AlignVCenter
+            }
+
+            Item { Layout.fillWidth: true }
+
             PlasmaComponents.Button {
                 icon.name: "configure"
                 display: QQC2.AbstractButton.IconOnly
@@ -174,8 +185,6 @@ PlasmaExtras.Representation {
                     }
                 }
             }
-
-            Item { Layout.fillWidth: true }
 
             PlasmaComponents.Button {
                 text: i18n("Open Merkuro")
