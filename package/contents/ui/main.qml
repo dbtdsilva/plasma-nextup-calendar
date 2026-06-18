@@ -88,5 +88,6 @@ PlasmoidItem {
         pimAvailable: backend.pimAvailable
         popupDays: Plasmoid.configuration.popupDays
         hideAllDay: Plasmoid.configuration.popupHideAllDay
+        lastRefresh: backend.lastRefresh
     }
 }
