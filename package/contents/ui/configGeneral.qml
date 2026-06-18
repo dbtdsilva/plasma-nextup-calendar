@@ -17,7 +17,6 @@ Kirigami.FormLayout {
     property alias cfg_panelHideAllDay: panelHideAllDay.checked
     property alias cfg_popupHideAllDay: popupHideAllDay.checked
     property alias cfg_alertEnabled: alertEnabled.checked
-    property alias cfg_alertMinutesBefore: alertMinutesBefore.value
 
     Kirigami.Separator {
         Kirigami.FormData.label: i18n("Next up (panel)")
@@ -46,7 +45,7 @@ Kirigami.FormLayout {
 
     QQC2.SpinBox {
         id: urgentThreshold
-        Kirigami.FormData.label: i18n("Turn the status dot orange within (minutes):")
+        Kirigami.FormData.label: i18n("Mark the next event imminent within (minutes):")
         from: 0
         to: 60
     }
@@ -87,15 +86,7 @@ Kirigami.FormLayout {
 
     QQC2.CheckBox {
         id: alertEnabled
-        Kirigami.FormData.label: i18n("Notify before the next event:")
+        Kirigami.FormData.label: i18n("Notify when imminent:")
         text: i18n("Show a desktop notification")
-    }
-
-    QQC2.SpinBox {
-        id: alertMinutesBefore
-        Kirigami.FormData.label: i18n("Minutes before:")
-        from: 1
-        to: 120
-        enabled: alertEnabled.checked
     }
 }

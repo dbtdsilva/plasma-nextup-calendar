@@ -60,7 +60,7 @@ PlasmoidItem {
 
         const alert = Logic.evaluateAlert(selection, now, {
             alertEnabled: cfg.alertEnabled,
-            alertMinutesBefore: cfg.alertMinutesBefore,
+            urgentThresholdMinutes: cfg.urgentThresholdMinutes,
         }, root.lastAlertedKey);
         root.lastAlertedKey = alert.key;
         if (alert.fire) {
