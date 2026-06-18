@@ -164,7 +164,7 @@ PlasmaExtras.Representation {
             anchors.fill: parent
 
             PlasmaComponents.Label {
-                text: full.lastRefresh ? i18n("Updated %1", Qt.formatTime(full.lastRefresh)) : ""
+                text: full.lastRefresh ? i18n("Updated %1", Qt.formatTime(full.lastRefresh, "hh:mm:ss")) : ""
                 opacity: 0.7
                 font: Kirigami.Theme.smallFont
                 Layout.alignment: Qt.AlignVCenter
