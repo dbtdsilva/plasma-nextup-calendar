@@ -181,7 +181,7 @@ function evaluateAlert(selection, now, opts, lastAlertedKey) {
         return { fire: false, key: lastAlertedKey };
     }
     var mins = Math.ceil((selection.event.startDateTime - now) / 60000);
-    if (mins <= o.alertMinutesBefore) {
+    if (mins <= o.urgentThresholdMinutes) {
         return { fire: true, key: key };
     }
     return { fire: false, key: lastAlertedKey };

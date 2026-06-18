@@ -252,11 +252,11 @@ test("groupByDay labels the second day Tomorrow", () => {
     assert.equal(groups[0].label, "Tomorrow");
 });
 
-const ALERT_OPTS = { alertEnabled: true, alertMinutesBefore: 5 };
+const ALERT_OPTS = { alertEnabled: true, urgentThresholdMinutes: 5 };
 
 test("evaluateAlert: disabled never fires", () => {
     const sel = { kind: "upcoming", event: ev({ startDateTime: new Date("2026-06-12T13:03:00") }) };
-    assert.deepEqual(L.evaluateAlert(sel, NOW, { alertEnabled: false, alertMinutesBefore: 5 }, ""), { fire: false, key: "" });
+    assert.deepEqual(L.evaluateAlert(sel, NOW, { alertEnabled: false, urgentThresholdMinutes: 5 }, ""), { fire: false, key: "" });
 });
 
 test("evaluateAlert: fires once when upcoming within threshold", () => {
