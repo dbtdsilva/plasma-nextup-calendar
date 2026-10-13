@@ -48,5 +48,9 @@
             <label>Show a notification before the next event</label>
             <default>false</default>
         </entry>
+        <entry name="refreshIntervalMinutes" type="Int">
+            <label>Force a calendar sync this often (minutes); 0 disables it</label>
+            <default>3</default>
+        </entry>
     </group>
 </kcfg>

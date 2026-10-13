@@ -18,6 +18,7 @@ Kirigami.FormLayout {
     property alias cfg_panelBold: panelBold.checked
     property alias cfg_popupHideAllDay: popupHideAllDay.checked
     property alias cfg_alertEnabled: alertEnabled.checked
+    property alias cfg_refreshIntervalMinutes: refreshInterval.value
 
     Kirigami.Separator {
         Kirigami.FormData.label: i18n("Next up (panel)")
@@ -95,5 +96,17 @@ Kirigami.FormLayout {
         id: alertEnabled
         Kirigami.FormData.label: i18n("Notify when imminent:")
         text: i18n("Show a desktop notification")
+    }
+
+    Kirigami.Separator {
+        Kirigami.FormData.label: i18n("Calendar refresh")
+        Kirigami.FormData.isSection: true
+    }
+
+    QQC2.SpinBox {
+        id: refreshInterval
+        Kirigami.FormData.label: i18n("Refresh calendars every (minutes), 0 = off:")
+        from: 0
+        to: 240
     }
 }
